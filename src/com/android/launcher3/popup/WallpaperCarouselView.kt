@@ -58,7 +58,13 @@ class WallpaperCarouselView @JvmOverloads constructor(
 
     init {
         orientation = HORIZONTAL
-        addView(loadingView)
+        if (loadingView.parent == null) {
+            addView(loadingView)
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
         observeWallpapers()
     }
 
@@ -70,10 +76,25 @@ class WallpaperCarouselView @JvmOverloads constructor(
                     .getOrDefault(emptyList())
             }
 
-            if (!isAttachedToWindow) return@launch
+            if (!isAttachedToWindow) {
+                loadingView.visibility = GONE
+                return@launch
+            }
 
-            visibility = if (wallpapers.isEmpty()) GONE else VISIBLE
-            if (wallpapers.isNotEmpty()) displayWallpapers(wallpapers) else loadingView.visibility = GONE
+            if (wallpapers.isEmpty()) {
+                visibility = GONE
+                loadingView.visibility = GONE
+                return@launch
+            }
+
+            visibility = VISIBLE
+            try {
+                displayWallpapers(wallpapers)
+            } catch (e: Exception) {
+                Log.e("WallpaperCarouselView", "Error displaying wallpapers", e)
+            } finally {
+                loadingView.visibility = GONE
+            }
         }
     }
 
