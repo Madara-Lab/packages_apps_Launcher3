@@ -56,6 +56,7 @@ import static com.android.launcher3.LauncherAnimUtils.HOTSEAT_SCALE_PROPERTY_FAC
 import static com.android.launcher3.LauncherAnimUtils.SCALE_INDEX_REVEAL_ANIM;
 import static com.android.launcher3.LauncherAnimUtils.WORKSPACE_SCALE_PROPERTY_FACTORY;
 import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
+import static com.android.launcher3.LauncherPrefs.APP_LAUNCH_BLUR_ENABLED;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.BACKGROUND_APP;
 import static com.android.launcher3.LauncherState.NORMAL;
@@ -934,7 +935,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                 if (taskbarInteractor != null) {
                     taskbarInteractor.showEduOnAppLaunch();
                 }
-                if (appLaunchBlur()) {
+                if (appLaunchBlur() && isAppLaunchBlurEnabled()) {
                     resetScrim(surfaceApplier, scrimLayer);
                 }
                 openingTargets.release();
@@ -1150,7 +1151,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     }
                 }
 
-                if (appLaunchBlur() && scrimLayer != null && scrimLayer.isValid()) {
+                if (appLaunchBlur() && isAppLaunchBlurEnabled() && scrimLayer != null && scrimLayer.isValid()) {
                     SurfaceProperties builder = transaction.forSurface(scrimLayer);
                     builder.setAlpha(mBlurScrimAlpha.value);
                     builder.setBackgroundBlurRadius((int) mBlurRadius.value);
@@ -1225,7 +1226,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
         appAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (appLaunchBlur()) {
+                if (appLaunchBlur() && isAppLaunchBlurEnabled()) {
                     resetScrim(surfaceApplier, scrimLayer);
                 }
                 openingTargets.release();
@@ -1309,7 +1310,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                     }
                 }
 
-                if (appLaunchBlur() && scrimLayer != null && scrimLayer.isValid()) {
+                if (appLaunchBlur() && isAppLaunchBlurEnabled() && scrimLayer != null && scrimLayer.isValid()) {
                     SurfaceProperties builder = transaction.forSurface(scrimLayer);
                     builder.setAlpha(percent * scrimAlpha);
                     builder.setBackgroundBlurRadius((int) (percent * mMaxBlurRadius));
@@ -1331,7 +1332,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
 
     private SurfaceControl addScrimLayer(SurfaceTransactionApplier applier,
             RemoteAnimationTargets targets) {
-        if (!appLaunchBlur()) {
+        if (!appLaunchBlur() || !isAppLaunchBlurEnabled()) {
             return null;
         }
 
@@ -1380,6 +1381,10 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             surfaceTransaction.getTransaction().remove(scrimLayer);
             applier.scheduleApply(surfaceTransaction);
         }
+    }
+
+    private boolean isAppLaunchBlurEnabled() {
+        return LauncherPrefs.get(mLauncher).get(APP_LAUNCH_BLUR_ENABLED);
     }
 
     /** Returns animator that controls depth/blur of the background during app/widget opening. */
