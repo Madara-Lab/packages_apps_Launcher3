@@ -1888,7 +1888,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             @Override
             public void onAnimationStart(Animator animation) {
                 anim.start(mLauncher, mDeviceProfile, velocityPxPerS);
-                boostInteraction(700);
+                boostInteraction(500);
             }
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -2034,7 +2034,7 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
                             }
                         });
                 super.onAnimationStart(animation);
-                boostInteraction(700);
+                boostInteraction(500);
             }
 
             @Override
