@@ -338,6 +338,26 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         lensButton.setOnClickListener(this);
         lensButton.setVisibility(mLens && Utilities.isGSAEnabled(getContext()) ? VISIBLE : GONE);
         if (lensButtonSpace != null) lensButtonSpace.setVisibility(mLens && Utilities.isGSAEnabled(getContext()) ? VISIBLE : GONE);
+
+        if (mIsNewStyle) {
+            updateSecondActionsRowVisibility();
+        }
+    }
+
+    private void updateSecondActionsRowVisibility() {
+        View row = findViewById(R.id.second_overview_actions_container);
+        if (row == null) return;
+
+        View screenshotButton = findViewById(R.id.action_screenshot);
+        View splitButton = mSplitButton != null ? mSplitButton : findViewById(R.id.action_split);
+        View lensButton = findViewById(R.id.action_lens);
+
+        boolean anyVisible =
+                (screenshotButton != null && screenshotButton.getVisibility() == VISIBLE)
+                        || (splitButton != null && splitButton.getVisibility() == VISIBLE)
+                        || (lensButton != null && lensButton.getVisibility() == VISIBLE);
+
+        row.setVisibility(anyVisible ? VISIBLE : GONE);
     }
 
     private void performMemoryBoost() {
@@ -563,6 +583,10 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
                 if (splitButtonSpace != null) splitButtonSpace.setVisibility(desiredVisibility);
             }
             mActionButtons.requestLayout();
+
+            if (mIsNewStyle) {
+                updateSecondActionsRowVisibility();
+            }
         }
     }
 
