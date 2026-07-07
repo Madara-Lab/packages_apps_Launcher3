@@ -528,4 +528,7 @@
     <string name="app_info_custom_icon_title">Custom icon</string>
     <string name="app_info_custom_icon_summary">Pick any icon from any icon pack</string>
     <string name="icon_picker_search_hint">Search icons</string>
+
+    <!-- Atmosphere Effects -->
+    <string name="atmosphere_effects_title">Atmosphere Effects</string>
 </resources>
