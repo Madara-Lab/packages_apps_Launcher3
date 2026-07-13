@@ -135,6 +135,12 @@ public class DepthController extends BaseDepthController implements StateHandler
     public void setActivityStarted(boolean isStarted) {
         if (isStarted) {
             addOnDrawListener();
+            if (mLauncher != null && mLauncher.getDragLayer() != null) {
+                mLauncher.getDragLayer().post(() -> {
+                    mLauncher.getDragLayer().requestLayout();
+                    mLauncher.getDragLayer().invalidate();
+                });
+            }
         } else {
             removeOnDrawListener();
             setBaseSurface(null);
