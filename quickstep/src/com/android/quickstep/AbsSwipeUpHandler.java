@@ -1715,6 +1715,15 @@ public abstract class AbsSwipeUpHandler<
         long finalDuration = duration;
         Interpolator finalInterpolator = interpolator;
         runOnRecentsAnimationAndLauncherBound(() -> {
+            if (isCancel && endTarget == GestureEndTarget.LAST_TASK) {
+                if (mRecentsAnimationController != null) {
+                    mRecentsAnimationController.finish(
+                            /* toHome= */ false,
+                            /* onFinishComplete= */ null,
+                            new ActiveGestureLog.CompoundString(
+                                    "AbsSwipeUpHandler.handleNormalGestureEnd: finish on cancel"));
+                }
+            }
             animateGestureEnd(
                 startShift, endShift, finalDuration, finalInterpolator, endTarget, velocityPxPerMs);
         });
