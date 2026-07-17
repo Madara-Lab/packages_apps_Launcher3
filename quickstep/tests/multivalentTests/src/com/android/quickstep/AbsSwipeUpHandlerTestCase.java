@@ -517,18 +517,6 @@ public abstract class AbsSwipeUpHandlerTestCase<
     }
 
     @Test
-    public void recentsAnimationStartTimeout_invalidatesSwipeHandler() {
-        SWIPE_HANDLER handler = createSwipeHandler();
-
-        runOnMainSync(handler::onRecentsAnimationStartTimedOut);
-
-        verify(mContextInitListener)
-                .unregister(eq("AbsSwipeUpHandler.onRecentsAnimationStartTimedOut"));
-        assertTrue(handler.mStateCallback.hasStates(STATE_GESTURE_CANCELLED));
-        assertTrue(handler.mStateCallback.hasStates(STATE_HANDLER_INVALIDATED));
-    }
-
-    @Test
     @EnableFlags(com.android.launcher3.Flags.FLAG_MSDL_FEEDBACK)
     public void onMotionPauseDetected_playsSwipeThresholdToken() {
         SWIPE_HANDLER handler = createSwipeHandler();

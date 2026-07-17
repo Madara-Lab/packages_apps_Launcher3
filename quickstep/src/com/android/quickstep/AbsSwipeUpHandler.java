@@ -1143,7 +1143,17 @@ public abstract class AbsSwipeUpHandler<
     @Override
     public void onRecentsAnimationCanceled(HashMap<Integer, ThumbnailData> thumbnailDatas) {
         ActiveGestureProtoLogProxy.logAbsSwipeUpHandlerOnRecentsAnimationCanceled();
-        cleanUpOnFailedRecentsAnimation("AbsSwipeUpHandler.onRecentsAnimationCanceled");
+        mContextInitListener.unregister("AbsSwipeUpHandler.onRecentsAnimationCanceled");
+        mStateCallback.setStateOnUiThread(STATE_GESTURE_CANCELLED | STATE_HANDLER_INVALIDATED);
+        // Defer clearing the controller and the targets until after we've updated the state
+        mRecentsAnimationController = null;
+        mRecentsAnimationTargets = null;
+        if (mRecentsView != null) {
+            mRecentsView.setRecentsAnimationTargets(null, null);
+        }
+        if (!mGestureState.useSyntheticRecentsTransition()) {
+            maybeHandleUnfinishedTaskLaunch("onRecentsAnimationCanceled");
+        }
     }
 
     @UiThread
@@ -2449,20 +2459,6 @@ public abstract class AbsSwipeUpHandler<
         mTaskSnapshotCache.clear();
     }
 
-    private void cleanUpOnFailedRecentsAnimation(@NonNull String reason) {
-        mContextInitListener.unregister(reason);
-        mStateCallback.setStateOnUiThread(STATE_GESTURE_CANCELLED | STATE_HANDLER_INVALIDATED);
-        // Defer clearing the controller and the targets until after we've updated the state
-        mRecentsAnimationController = null;
-        mRecentsAnimationTargets = null;
-        if (mRecentsView != null) {
-            mRecentsView.setRecentsAnimationTargets(null, null);
-        }
-        if (!mGestureState.useSyntheticRecentsTransition()) {
-            maybeHandleUnfinishedTaskLaunch(reason);
-        }
-    }
-
     private void invalidateHandler() {
         if (!mContainerInterface.isInLiveTileMode() || mGestureState.getEndTarget() != RECENTS) {
             mInputConsumerProxy.destroy();
@@ -3117,12 +3113,6 @@ public abstract class AbsSwipeUpHandler<
         if (mRecentsView != null) {
             mRecentsView.setRecentsAnimationTargets(null, null);
         }
-    }
-
-    @Override
-    public void onRecentsAnimationStartTimedOut() {
-        ActiveGestureProtoLogProxy.logAbsSwipeUpHandlerOnRecentsAnimationStartTimedOut();
-        cleanUpOnFailedRecentsAnimation("AbsSwipeUpHandler.onRecentsAnimationStartTimedOut");
     }
 
     private boolean hasStartedTaskBefore(@NonNull RemoteAnimationTarget[] appearedTaskTargets) {
