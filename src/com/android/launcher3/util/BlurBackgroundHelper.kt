@@ -17,6 +17,7 @@
 package com.android.launcher3.util
 
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.view.View
 import com.android.launcher3.dagger.ActivityContextSingleton
 import com.android.launcher3.folder.Folder
@@ -45,4 +46,13 @@ constructor() {
     open fun applyPopupBlurBackground(view: View) {}
 
     open fun getPopupBlurSurfaceColor(fallbackColor: Int) = fallbackColor
+
+    open fun isFolderIconBlurEnabled() = isBlurEnabled()
+
+    open fun drawFolderIconBlur(
+        canvas: Canvas,
+        view: View,
+        bounds: Rect,
+        cornerRadius: Float,
+    ): Boolean = false
 }

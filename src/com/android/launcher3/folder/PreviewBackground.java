@@ -54,6 +54,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.celllayout.DelegatedCellDrawing;
 import com.android.launcher3.graphics.ShapeDelegate;
 import com.android.launcher3.graphics.ThemeManager;
+import com.android.launcher3.util.BlurBackgroundHelper;
 import com.android.launcher3.views.ActivityContext;
 
 /**
@@ -299,21 +300,65 @@ public class PreviewBackground extends DelegatedCellDrawing {
         return mBgColor;
     }
 
-    public void drawBackground(Canvas canvas) {
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(getBgColor());
+    private BlurBackgroundHelper mBlurBackgroundHelper;
 
-        if (mFolderStyle == LauncherSettings.Favorites.FOLDER_STYLE_GRID) {
-            float radius = previewSize * 0.15f;
-            float size = previewSize * mScale;
-            float offset = (previewSize - size) / 2;
-            float left = getOffsetX() + offset;
-            float top = getOffsetY() + offset;
-            canvas.drawRoundRect(left, top, left + size, top + size, radius, radius, mPaint);
-        } else {
-            getShape().drawShape(canvas, getOffsetX(), getOffsetY(), getScaledRadius(), mPaint);
+    public void setBlurBackgroundHelper(BlurBackgroundHelper helper) {
+        mBlurBackgroundHelper = helper;
+        invalidate();
+    }
+
+    public void drawBackground(Canvas canvas) {
+        boolean blurred = false;
+        if (mBlurBackgroundHelper != null && mInvalidateDelegate != null
+                && canvas.isHardwareAccelerated()) {
+            Rect blurBounds = computeBlurBounds();
+            float radius = mFolderStyle == LauncherSettings.Favorites.FOLDER_STYLE_GRID
+                    ? previewSize * 0.15f
+                    : getScaledRadius();
+            blurred = mBlurBackgroundHelper.drawFolderIconBlur(
+                    canvas, mInvalidateDelegate, blurBounds, radius);
+            if (blurred) {
+                mPaint.setStyle(Paint.Style.FILL);
+                mPaint.setColor(mBlurBackgroundHelper.getPopupBlurSurfaceColor(getBgColor()));
+                if (mFolderStyle == LauncherSettings.Favorites.FOLDER_STYLE_GRID) {
+                    float size = previewSize * mScale;
+                    float offset = (previewSize - size) / 2;
+                    float left = getOffsetX() + offset;
+                    float top = getOffsetY() + offset;
+                    float r = previewSize * 0.15f;
+                    canvas.drawRoundRect(left, top, left + size, top + size, r, r, mPaint);
+                } else {
+                    getShape().drawShape(canvas, getOffsetX(), getOffsetY(), getScaledRadius(), mPaint);
+                }
+            }
+        }
+        if (!blurred) {
+            mPaint.setStyle(Paint.Style.FILL);
+            mPaint.setColor(getBgColor());
+            if (mFolderStyle == LauncherSettings.Favorites.FOLDER_STYLE_GRID) {
+                float radius = previewSize * 0.15f;
+                float size = previewSize * mScale;
+                float offset = (previewSize - size) / 2;
+                float left = getOffsetX() + offset;
+                float top = getOffsetY() + offset;
+                canvas.drawRoundRect(left, top, left + size, top + size, radius, radius, mPaint);
+            } else {
+                getShape().drawShape(canvas, getOffsetX(), getOffsetY(), getScaledRadius(), mPaint);
+            }
         }
         drawShadow(canvas);
+    }
+
+    private Rect computeBlurBounds() {
+        if (mFolderStyle == LauncherSettings.Favorites.FOLDER_STYLE_GRID) {
+            float size = previewSize * mScale;
+            float offset = (previewSize - size) / 2;
+            int left = (int) (getOffsetX() + offset);
+            int top = (int) (getOffsetY() + offset);
+            return new Rect(left, top, (int) (left + size), (int) (top + size));
+        }
+        int r = getScaledRadius();
+        return new Rect(getOffsetX(), getOffsetY(), getOffsetX() + 2 * r, getOffsetY() + 2 * r);
     }
 
     private ShapeDelegate getShape() {

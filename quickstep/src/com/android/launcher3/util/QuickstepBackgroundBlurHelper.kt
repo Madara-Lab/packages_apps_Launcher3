@@ -253,4 +253,34 @@ constructor(
             ColorUtils.setAlphaComponent(color, (0.60f * 255).toInt())
         }
     }
+
+    private val folderIconBlurRadius =
+        context.resources.getDimensionPixelSize(R.dimen.popup_blur_radius) // or a dedicated dimen
+
+    private val folderIconBlurDrawable: BackgroundBlurDrawable? by lazy {
+        if (!isBlurEnabled()) null
+        else
+            activityContext.dragLayer.getViewRootImpl()
+                ?.createBackgroundBlurDrawable()?.apply {
+                    setBlurRadius(folderIconBlurRadius)
+                    setVisible(false, false)
+                }
+    }
+
+    override fun drawFolderIconBlur(
+        canvas: Canvas,
+        view: View,
+        bounds: Rect,
+        cornerRadius: Float,
+    ): Boolean {
+        if (!isFolderIconBlurEnabled()) return false
+        val d = folderIconBlurDrawable ?: return false
+        d.setVisible(true, false)
+        d.bounds = bounds
+        d.setCornerRadius(cornerRadius)
+        d.draw(canvas)
+        return true
+    }
+
+    override fun isFolderIconBlurEnabled(): Boolean = isBlurEnabled() && isHomescreen()
 }

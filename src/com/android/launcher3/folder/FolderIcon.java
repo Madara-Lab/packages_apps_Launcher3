@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -43,6 +44,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -65,6 +67,7 @@ import com.android.launcher3.popup.SystemShortcut;
 import com.android.launcher3.R;
 import com.android.launcher3.Reorderable;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.util.BlurBackgroundHelper;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.allapps.ActivityAllAppsContainerView;
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;
@@ -90,6 +93,7 @@ import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.popup.Poppable;
 import com.android.launcher3.popup.PoppableType;
 import com.android.launcher3.popup.PopupController;
+import com.android.launcher3.util.BlurBackgroundHelper;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.Themes;
@@ -129,6 +133,8 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
 
     PreviewBackground mBackground = new PreviewBackground(getContext());
     private boolean mBackgroundIsVisible = true;
+
+    private BlurBackgroundHelper mBlurBackgroundHelper;
 
     FolderGridOrganizer mPreviewVerifier;
     final ClippedFolderIconLayoutRule mPreviewLayoutRule;
@@ -258,6 +264,9 @@ public class FolderIcon extends FrameLayout implements FloatingIconViewCompanion
         icon.mInfo = folderInfo;
         icon.mActivity = activity;
         icon.mDotRenderer = grid.mDotRendererWorkSpace;
+
+        icon.mBlurBackgroundHelper = activity.getActivityComponent().getBlurBackgroundHelper();
+        icon.mBackground.setBlurBackgroundHelper(icon.mBlurBackgroundHelper);
 
         icon.updateDotInfo();
         icon.setContentDescription(icon.getAccessiblityTitle(folderInfo.title));
