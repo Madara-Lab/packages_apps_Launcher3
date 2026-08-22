@@ -248,7 +248,6 @@ import com.android.launcher3.util.PluginManagerWrapper;
 import com.android.launcher3.util.RunnableList;
 import com.android.launcher3.util.ScreenOnTracker;
 import com.android.launcher3.util.ScreenOnTracker.ScreenOnListener;
-import com.android.launcher3.util.ShakeDetector;
 import com.android.launcher3.util.SettingsCache;
 import com.android.launcher3.util.StableViewInfo;
 import com.android.launcher3.util.SystemUiController;
@@ -324,7 +323,6 @@ public class Launcher extends StatefulActivity<LauncherState>
             "launcher.extra.EXCLUDE_CLOSE_WIDGET_PICKER";
 
     private StateManager<LauncherState, Launcher> mStateManager;
-    private ShakeDetector mShakeDetector;
 
     private final com.android.launcher3.util.MultiSelectController mMultiSelectController = new com.android.launcher3.util.MultiSelectController();
 
@@ -482,21 +480,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         initDragController();
         mAllAppsController = new AllAppsTransitionController(this);
         mStateManager = new StateManager<>(this, NORMAL);
-        mShakeDetector = new ShakeDetector(this, () -> {
-            if (mWorkspace != null && mStateManager.getState() == LauncherState.EDIT_MODE) {
-                mWorkspace.arrangeWorkspaceItems();
-            }
-        });
-        mStateManager.addStateListener(new StateManager.StateListener<LauncherState>() {
-            @Override
-            public void onStateTransitionComplete(LauncherState finalState) {
-                if (finalState == LauncherState.EDIT_MODE) {
-                    mShakeDetector.start();
-                } else {
-                    mShakeDetector.stop();
-                }
-            }
-        });
         if (refactorTaskbarUiState()) {
             mStateManager.setLauncherUiState(mLauncherUiState);
         }
@@ -710,10 +693,6 @@ public class Launcher extends StatefulActivity<LauncherState>
      */
     protected void initDragController() {
         mDragController = new LauncherDragController(this);
-    }
-
-    public com.android.launcher3.util.ShakeDetector getShakeDetector() {
-        return mShakeDetector;
     }
 
     @Override
@@ -1282,10 +1261,6 @@ public class Launcher extends StatefulActivity<LauncherState>
             mQuickSpace.onResume();
         }
 
-        if (mStateManager.getState() == LauncherState.EDIT_MODE && mShakeDetector != null) {
-            mShakeDetector.start();
-        }
-
         if (mDeferOverlayCallbacks) {
             scheduleDeferredCheck();
         } else {
@@ -1307,11 +1282,6 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     protected void onPause() {
         boostInteraction(10);
-
-        if (mShakeDetector != null) {
-            mShakeDetector.stop();
-        }
-
         // Ensure that items added to Launcher are queued until Launcher returns
         ItemInstallQueue.INSTANCE.get(this).pauseModelPush(FLAG_ACTIVITY_PAUSED);
 
@@ -1838,10 +1808,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     public void onDestroy() {
-        if (mShakeDetector != null) {
-            mShakeDetector.stop();
-            mShakeDetector = null;
-        }
         super.onDestroy();
         ACTIVITY_TRACKER.onContextDestroyed(this);
 
