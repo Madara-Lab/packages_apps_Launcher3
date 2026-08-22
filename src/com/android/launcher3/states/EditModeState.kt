@@ -56,17 +56,6 @@ class EditModeState(id: Int) : LauncherState(id, StatsLogManager.LAUNCHER_STATE_
     }
 
     override fun onLeavingState(launcher: Launcher?, toState: LauncherState?) {
-        launcher?.let { l ->
-            l.multiSelectController?.clearSelection()
-            l.workspace?.let { workspace ->
-                workspace.mapOverItems { _, view ->
-                    if (view.visibility == android.view.View.INVISIBLE) {
-                        view.visibility = android.view.View.VISIBLE
-                    }
-                    view.invalidate()
-                    false
-                }
-            }
-        }
+        // cleanup any changes to workspace
     }
 }
