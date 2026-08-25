@@ -14,7 +14,7 @@ public class IconDatabase {
 
     private static final String PREF_FILE_NAME = BuildConfig.APPLICATION_ID + ".ICON_DATABASE";
     public static final String KEY_ICON_PACK = "pref_icon_pack";
-    public static final String VALUE_DEFAULT = "";
+    public static final String VALUE_DEFAULT = "website.leifs.delta.foss";
     private static final String DRAWABLE_SEPARATOR = "::";
 
     public static String getGlobal(Context context) {
@@ -25,7 +25,7 @@ public class IconDatabase {
         if (context == null) return "Default";
         final String defaultLabel = context.getString(R.string.icon_pack_default_label);
         final String pkgName = getGlobal(context);
-        if (VALUE_DEFAULT.equals(pkgName)) {
+        if (pkgName == null || pkgName.isEmpty()) {
             return defaultLabel;
         }
 
@@ -55,7 +55,7 @@ public class IconDatabase {
     public static void setForComponent(Context context, ComponentKey key, String value) {
         getIconPackPrefs(context).edit().putString(key.toString(), value).apply();
     }
-    
+
     public static void setExplicitIconForComponent(
             Context context, ComponentKey key, String packPackage, String drawableName) {
         getIconPackPrefs(context).edit()
